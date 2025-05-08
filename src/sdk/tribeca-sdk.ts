@@ -301,6 +301,7 @@ export class TribecaSDK {
     tokenMint: PublicKey
   ) {
     try {
+      console.log("payer", payer);
       // Create the instruction
       const unlockTokensInstruction = await this.tribecaProgram.methods
         .exit()
@@ -496,7 +497,7 @@ export class TribecaSDK {
     redeemer: PublicKey
   ) {
     try {
-      const [blacklistPDA, blacklistBump] = PublicKey.findProgramAddressSync(
+      const [blacklistPDA] = PublicKey.findProgramAddressSync(
         [Buffer.from("Blacklist"), locker.toBuffer(), escrow.toBuffer()],
         this.tribecaProgram.programId
       );
@@ -538,7 +539,7 @@ export class TribecaSDK {
     redeemer: PublicKey
   ) {
     try {
-      const [blacklistPDA, blacklistBump] = PublicKey.findProgramAddressSync(
+      const [blacklistPDA] = PublicKey.findProgramAddressSync(
         [Buffer.from("Blacklist"), locker.toBuffer(), escrow.toBuffer()],
         this.tribecaProgram.programId
       );

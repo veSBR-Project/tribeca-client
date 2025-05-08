@@ -549,6 +549,10 @@ export const Admin: FC = () => {
           <div className="card">
             <h2 className="text-2xl font-semibold text-white mb-4">
               Update Redemption Rate
+              <br />
+              <span className="text-[#8E8E93] text-sm">
+                i.e 1000 for 1000 veSBR = 1 USDC
+              </span>
             </h2>
             <div className="space-y-4">
               <input

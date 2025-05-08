@@ -31,13 +31,16 @@ export const Dashboard: FC = () => {
         <h1 className="text-5xl font-bold text-white mb-12 tracking-tight">
           Dashboard
         </h1>
+
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
             <div className="spinner"></div>
           </div>
         ) : error ? (
           <div className="bg-[#FF3B30]/10 border border-[#FF3B30] rounded-xl p-6 text-[#FF3B30] animate-scale-in">
-            {error}
+            {error === "No escrow account found"
+              ? "You do not have any locked tokens"
+              : error}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -63,16 +66,19 @@ export const Dashboard: FC = () => {
             </div>
           </div>
         )}
-        {lockedTokens.escrow && lockedTokens.locker && (
-          <div className="mt-8 flex justify-center">
-            <Link
-              to="/unlock"
-              className="px-8 py-4 bg-[#007AFF] hover:bg-[#0066CC] text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
-            >
-              Unlock Tokens
-            </Link>
-          </div>
-        )}
+
+        {lockedTokens.escrow &&
+          !lockedTokens.isBlacklisted &&
+          lockedTokens.amount !== 0 && (
+            <div className="mt-8 flex justify-center">
+              <Link
+                to="/unlock"
+                className="px-8 py-4 bg-[#007AFF] hover:bg-[#0066CC] text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
+              >
+                Unlock Tokens
+              </Link>
+            </div>
+          )}
       </div>
     </div>
   );

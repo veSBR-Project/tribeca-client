@@ -1,3 +1,4 @@
+import "./utils/polyfills";
 import { Buffer } from "buffer";
 import process from "process";
 

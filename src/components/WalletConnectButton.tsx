@@ -19,7 +19,6 @@ import { PublicKey } from "@solana/web3.js";
 import { useUIStore } from "../store/uiStore";
 import { useTokenStore } from "../store/tokenStore";
 import { useRedeemerStore } from "../store/redeemerStore";
-import type { EscrowAccount } from "../utils/helpers";
 import { BN } from "@coral-xyz/anchor";
 
 export const WalletConnectButton = () => {
@@ -88,22 +87,28 @@ export const WalletConnectButton = () => {
         );
 
         setLoading(true);
-        const power = await sdk.getVotingPower(
-          escrowPDA,
-          new PublicKey(LOCKER_PDA)
-        );
-
-        setVotingPower(power);
 
         //fetch locked tokens from escrow account
-        const escrowAccount = (await sdk.tribecaProgram.account.escrow.fetch(
-          escrowPDA
-        )) as unknown as EscrowAccount;
+        const escrowAccount: any = await sdk.tribecaProgram.account.escrow
+          .fetch(escrowPDA)
+          .catch(() => {
+            setError("No escrow account found");
+            setLockedTokens(0, escrowPDA, false);
+            setLoading(false);
+            setVotingPower(0);
+            return null;
+          });
 
-        if (!escrowAccount) {
-          setError("No escrow account found");
-          return;
-        }
+        if (!escrowAccount) return;
+
+        const power = await sdk
+          .getVotingPower(escrowPDA, new PublicKey(LOCKER_PDA))
+          .catch(() => {
+            setError("No escrow account found");
+            return 0;
+          });
+
+        setVotingPower(power);
 
         const isBlacklisted = await fetchBlacklist(escrowPDA);
         const amount = escrowAccount.amount.toNumber();
@@ -118,7 +123,12 @@ export const WalletConnectButton = () => {
       }
     };
 
-    fetchVotingPower();
+    // Add a small delay to ensure the blockchain state is updated
+    const timeoutId = setTimeout(() => {
+      fetchVotingPower();
+    }, 1000);
+
+    return () => clearTimeout(timeoutId);
   }, [publicKey, sdk]);
 
   useEffect(() => {
