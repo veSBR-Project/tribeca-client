@@ -11,11 +11,23 @@ import {
   LOCKED_V_PROGRAM,
   GOKI_PROGRAM,
   GOVERNOR_PROGRAM,
+  LOCKER_PDA,
+  REDEEMER_PDA,
+  USDC_DECIMALS,
 } from "../utils/constants";
+import { PublicKey } from "@solana/web3.js";
+import { useUIStore } from "../store/uiStore";
+import { useTokenStore } from "../store/tokenStore";
+import { useRedeemerStore } from "../store/redeemerStore";
+import type { EscrowAccount } from "../utils/helpers";
+import { BN } from "@coral-xyz/anchor";
 
 export const WalletConnectButton = () => {
-  const { wallet } = useWallet();
+  const { wallet, publicKey } = useWallet();
   const { sdk, setSDK } = useSDKStore();
+  const { setLoading, setError } = useUIStore();
+  const { setVotingPower, setLockedTokens } = useTokenStore();
+  const { setRedeemerStats, clearRedeemerStats } = useRedeemerStore();
 
   const handleUpdateSDK = async () => {
     if (!wallet) return;
@@ -31,17 +43,125 @@ export const WalletConnectButton = () => {
 
   useEffect(() => {
     const initSDK = async () => {
-      console.log("wallet", wallet?.adapter.connected);
-
       if (wallet?.adapter.connected) {
-        console.log("wallet connected");
         await handleUpdateSDK();
-        console.log(sdk);
       }
     };
 
     initSDK();
-  }, [wallet?.adapter.publicKey]);
+  }, [publicKey]);
+
+  const fetchBlacklist = async (escrowPDA: PublicKey) => {
+    if (!sdk?.tribecaProgram || !escrowPDA) return;
+
+    const [blacklistPDA] = PublicKey.findProgramAddressSync(
+      [
+        Buffer.from("Blacklist"),
+        new PublicKey(LOCKER_PDA).toBuffer(),
+        new PublicKey(escrowPDA).toBuffer(),
+      ],
+      sdk?.tribecaProgram.programId
+    );
+
+    const blacklist = await sdk?.tribecaProgram.account.blacklist
+      .fetch(blacklistPDA)
+      .catch(() => {
+        return false;
+      });
+
+    if (blacklist) return true;
+  };
+
+  useEffect(() => {
+    const fetchVotingPower = async () => {
+      try {
+        if (!publicKey || !sdk) return;
+
+        // Find escrow PDA
+        const [escrowPDA] = PublicKey.findProgramAddressSync(
+          [
+            Buffer.from("Escrow"),
+            new PublicKey(LOCKER_PDA).toBuffer(),
+            publicKey.toBuffer(),
+          ],
+          sdk.tribecaProgram.programId
+        );
+
+        setLoading(true);
+        const power = await sdk.getVotingPower(
+          escrowPDA,
+          new PublicKey(LOCKER_PDA)
+        );
+
+        setVotingPower(power);
+
+        //fetch locked tokens from escrow account
+        const escrowAccount = (await sdk.tribecaProgram.account.escrow.fetch(
+          escrowPDA
+        )) as unknown as EscrowAccount;
+
+        if (!escrowAccount) {
+          setError("No escrow account found");
+          return;
+        }
+
+        const isBlacklisted = await fetchBlacklist(escrowPDA);
+        const amount = escrowAccount.amount.toNumber();
+        setLockedTokens(amount, escrowPDA, isBlacklisted || false);
+      } catch (err) {
+        console.error("Error fetching escrow:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch voting power"
+        );
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchVotingPower();
+  }, [publicKey, sdk]);
+
+  useEffect(() => {
+    const fetchRedeemerStats = async () => {
+      try {
+        if (!sdk?.tribecaProgram) {
+          clearRedeemerStats();
+          return;
+        }
+
+        const redeemerData =
+          (await sdk.tribecaProgram.account.lockerRedeemer.fetch(
+            REDEEMER_PDA
+          )) as {
+            admin: PublicKey;
+            pendingAdmin: PublicKey;
+            treasury: PublicKey;
+            redemptionRate: BN;
+            status: number;
+            amount: BN;
+          };
+
+        setRedeemerStats({
+          admin: redeemerData.admin.toBase58(),
+          pendingAdmin: redeemerData.pendingAdmin.toBase58(),
+          treasury: redeemerData.treasury.toBase58(),
+          redemptionRate: redeemerData.redemptionRate.toNumber(),
+          isActive: redeemerData.status === 1,
+          amount: redeemerData.amount.toNumber() / 10 ** USDC_DECIMALS,
+        });
+      } catch (error) {
+        console.error("Error fetching redeemer stats:", error);
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch redeemer stats"
+        );
+        clearRedeemerStats();
+      }
+    };
+
+    fetchRedeemerStats();
+  }, [sdk?.tribecaProgram]);
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>

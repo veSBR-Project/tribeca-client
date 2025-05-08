@@ -330,6 +330,7 @@ export class TribecaSDK {
    * @param locker - The locker account
    * @param receiptMint - The mint of the receipt token
    * @param redemptionRate - The redemption rate of the locker redeemer
+   * @param cutoff_date - The cutoff date of the locker redeemer
    * @param treasuryTokenAccount - The treasury token account
    * @returns - The instruction to create a new locker redeemer
    */
@@ -338,6 +339,7 @@ export class TribecaSDK {
     locker: PublicKey,
     receiptMint: PublicKey,
     redemptionRate: any,
+    cutoff_date: any,
     treasuryTokenAccount: PublicKey
   ) {
     try {
@@ -353,7 +355,7 @@ export class TribecaSDK {
 
       // Create the instruction
       const createLockerRedeemerInstruction = await this.tribecaProgram.methods
-        .createRedeemer(redemptionRate, redeemerBump)
+        .createRedeemer(redemptionRate, cutoff_date, redeemerBump)
         .accounts({
           locker: locker,
           admin: payer, // must be admin of the locker
@@ -424,6 +426,7 @@ export class TribecaSDK {
    * @param locker - The locker account
    * @param redeemer - The redeemer account
    * @param receiptMint - The mint of the receipt token
+   * @param redeemerReceiptAccount - The redeemer receipt token account
    * @param escrow - The escrow account
    * @param escrowTokens - The escrow token account
    * @param treasuryTokenAccount - The treasury token account
@@ -442,7 +445,7 @@ export class TribecaSDK {
     userReceipt: PublicKey
   ) {
     try {
-      const [blacklistPDA, blacklistBump] = PublicKey.findProgramAddressSync(
+      const [blacklistPDA] = PublicKey.findProgramAddressSync(
         [Buffer.from("Blacklist"), locker.toBuffer(), escrow.toBuffer()],
         this.tribecaProgram.programId
       );

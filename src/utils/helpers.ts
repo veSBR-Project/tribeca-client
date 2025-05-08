@@ -1,5 +1,5 @@
 import { Program, AnchorProvider } from "@coral-xyz/anchor-0-29.0.0";
-import type { Idl } from "@coral-xyz/anchor-0-29.0.0";
+import type { BN, Idl } from "@coral-xyz/anchor-0-29.0.0";
 import { Connection, PublicKey, TransactionInstruction } from "@solana/web3.js";
 import type { Wallet } from "@solana/wallet-adapter-react";
 import {
@@ -7,6 +7,17 @@ import {
   createAssociatedTokenAccountInstruction,
   getAccount,
 } from "@solana/spl-token";
+
+export interface EscrowAccount {
+  locker: PublicKey;
+  owner: PublicKey;
+  bump: number;
+  tokens: PublicKey;
+  amount: BN;
+  escrowStartedAt: BN;
+  escrowEndsAt: BN;
+  voteDelegate: PublicKey;
+}
 
 export const getProgram = (
   wallet: Wallet,
@@ -82,4 +93,11 @@ export const getOrCreateATA = async (
     );
     return { address: ata, instruction };
   }
+};
+
+export const calculateRedeemableAmount = (
+  votingPower: number,
+  redemptionRate: number
+) => {
+  return votingPower / redemptionRate;
 };

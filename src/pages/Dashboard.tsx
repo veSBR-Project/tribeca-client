@@ -1,84 +1,14 @@
-import { useEffect } from "react";
 import type { FC } from "react";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { useSDKStore } from "../store/sdkStore";
 import { useTokenStore } from "../store/tokenStore";
 import { useUIStore } from "../store/uiStore";
 import { Link } from "react-router-dom";
-import { LOCKER_PDA, SBR_DECIMALS } from "../utils/constants";
-import { PublicKey } from "@solana/web3.js";
-import { BN } from "@coral-xyz/anchor";
-
-interface EscrowAccount {
-  locker: PublicKey;
-  owner: PublicKey;
-  bump: number;
-  tokens: PublicKey;
-  amount: BN;
-  escrowStartedAt: BN;
-  escrowEndsAt: BN;
-  voteDelegate: PublicKey;
-}
+import { SBR_DECIMALS } from "../utils/constants";
 
 export const Dashboard: FC = () => {
   const { publicKey } = useWallet();
-  const { sdk } = useSDKStore();
-  const { lockedTokens, votingPower, setVotingPower, setLockedTokens } =
-    useTokenStore();
-  const { isLoading, error, setLoading, setError } = useUIStore();
-
-  useEffect(() => {
-    const fetchVotingPower = async () => {
-      try {
-        if (!publicKey || !sdk) return;
-
-        // Find escrow PDA
-        const [escrowPDA] = PublicKey.findProgramAddressSync(
-          [
-            Buffer.from("Escrow"),
-            new PublicKey(LOCKER_PDA).toBuffer(),
-            publicKey.toBuffer(),
-          ],
-          sdk.tribecaProgram.programId
-        );
-
-        setLoading(true);
-        const power = await sdk.getVotingPower(
-          escrowPDA,
-          new PublicKey(LOCKER_PDA)
-        );
-
-        setVotingPower(power);
-
-        //fetch locked tokens from escrow account
-        const escrowAccount = (await sdk.tribecaProgram.account.escrow.fetch(
-          escrowPDA
-        )) as unknown as EscrowAccount;
-        console.log("escrowAccount", escrowAccount);
-        console.log("escrowAccount amount:", escrowAccount.amount.toNumber());
-        console.log("escrowAccount locker:", escrowAccount.locker.toString());
-        console.log("escrowAccount owner:", escrowAccount.owner.toString());
-
-        if (!escrowAccount) {
-          setError("No escrow account found");
-          return;
-        }
-
-        const amount = escrowAccount.amount.toNumber();
-        console.log("Setting locked tokens with amount:", amount);
-        setLockedTokens(amount, new PublicKey(LOCKER_PDA), publicKey);
-      } catch (err) {
-        console.error("Error fetching escrow:", err);
-        setError(
-          err instanceof Error ? err.message : "Failed to fetch voting power"
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchVotingPower();
-  }, [publicKey, sdk]);
+  const { lockedTokens, votingPower } = useTokenStore();
+  const { isLoading, error } = useUIStore();
 
   if (!publicKey) {
     return (

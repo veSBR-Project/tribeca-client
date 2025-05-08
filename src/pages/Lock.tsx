@@ -19,7 +19,6 @@ export const Lock: FC = () => {
   const [maxStakeDuration, setMaxStakeDuration] = useState(0);
   const [duration, setDuration] = useState("");
   const [sbrBalance, setSbrBalance] = useState(0);
-  const [escrowPDA, setEscrowPDA] = useState<any>(null);
 
   const fetchLocker = async () => {
     if (!sdk?.tribecaProgram) return;
@@ -35,30 +34,27 @@ export const Lock: FC = () => {
   };
 
   const fetchUserEscrowAccount = async () => {
-    if (!wallet?.adapter.publicKey || !sdk) return;
-
-    // Find escrow PDA
-    const [escrowPDA] = PublicKey.findProgramAddressSync(
-      [
-        Buffer.from("Escrow"),
-        new PublicKey(LOCKER_PDA).toBuffer(),
-        wallet.adapter.publicKey.toBuffer(),
-      ],
-      sdk?.tribecaProgram.programId
-    );
-
-    let escrow: any;
-
     try {
-      escrow = await sdk?.tribecaProgram.account.escrow.fetch(escrowPDA);
-      setEscrowPDA(escrowPDA);
-    } catch (err) {
-      console.log("escrow", err);
-      escrow = null;
-      setEscrowPDA(null);
-    }
+      if (!wallet?.adapter.publicKey || !sdk) return;
 
-    return escrow;
+      // Find escrow PDA
+      const [escrowPDA] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("Escrow"),
+          new PublicKey(LOCKER_PDA).toBuffer(),
+          wallet.adapter.publicKey.toBuffer(),
+        ],
+        sdk?.tribecaProgram.programId
+      );
+
+      const escrow = await sdk?.tribecaProgram.account.escrow.fetch(escrowPDA);
+
+      console.log("escrow does exist", escrow);
+
+      return escrowPDA;
+    } catch {
+      return null;
+    }
   };
 
   const fetchSPLBalance = async () => {
@@ -110,12 +106,12 @@ export const Lock: FC = () => {
         return;
       }
 
-      await fetchUserEscrowAccount();
+      let escrow: PublicKey | null | undefined = await fetchUserEscrowAccount();
 
       const transaction = new Transaction();
       const ataTransaction = new Transaction();
 
-      if (!escrowPDA) {
+      if (!escrow) {
         const { createEscrowInstruction, escrowPDA } =
           await sdk.createNewEscrow(
             wallet.adapter.publicKey,
@@ -123,9 +119,13 @@ export const Lock: FC = () => {
             wallet.adapter.publicKey
           );
 
-        setEscrowPDA(escrowPDA);
+        escrow = escrowPDA;
+        ataTransaction.add(createEscrowInstruction);
+      }
 
-        transaction.add(createEscrowInstruction);
+      if (!escrow) {
+        toast.error("Escrow PDA is not initialized, please try again.");
+        return;
       }
 
       const {
@@ -144,7 +144,7 @@ export const Lock: FC = () => {
       } = await getOrCreateATA(
         connection,
         new PublicKey(SBR_MINT),
-        escrowPDA,
+        escrow,
         wallet.adapter.publicKey,
         true
       );
@@ -180,7 +180,7 @@ export const Lock: FC = () => {
       const { lockTokensInstruction } = await sdk.lockTokens(
         wallet.adapter.publicKey,
         new PublicKey(LOCKER_PDA),
-        escrowPDA,
+        escrow,
         escrowTokenAccount,
         sourceTokenAccount,
         new BN(amountToLock),

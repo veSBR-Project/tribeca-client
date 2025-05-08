@@ -6,13 +6,6 @@ export const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 flex justify-between items-center px-8 py-4 glass-effect z-50">
       <div className="flex items-center space-x-8">
         <Link
-          to="/"
-          className="text-lg font-medium text-white hover:text-[#007AFF] transition-all duration-300 relative group"
-        >
-          Home
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#007AFF] transition-all duration-300 group-hover:w-full"></span>
-        </Link>
-        <Link
           to="/dashboard"
           className="text-lg font-medium text-white hover:text-[#007AFF] transition-all duration-300 relative group"
         >
@@ -27,17 +20,17 @@ export const Navbar = () => {
           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#007AFF] transition-all duration-300 group-hover:w-full"></span>
         </Link>
         <Link
-          to="/unlock"
+          to="/redeem"
           className="text-lg font-medium text-white hover:text-[#007AFF] transition-all duration-300 relative group"
         >
-          Unlock Tokens
+          Redeem veSBR
           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#007AFF] transition-all duration-300 group-hover:w-full"></span>
         </Link>
         <Link
-          to="/vote"
+          to="/admin"
           className="text-lg font-medium text-white hover:text-[#007AFF] transition-all duration-300 relative group"
         >
-          Vote
+          Admin
           <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#007AFF] transition-all duration-300 group-hover:w-full"></span>
         </Link>
       </div>
