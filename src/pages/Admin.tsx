@@ -55,13 +55,16 @@ export const Admin: FC = () => {
       ).blockhash;
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
-      await connection.confirmTransaction({
-        signature: tx,
-        blockhash: transaction.recentBlockhash,
-        lastValidBlockHeight: (
-          await connection.getLatestBlockhash()
-        ).lastValidBlockHeight,
-      });
+      await connection.confirmTransaction(
+        {
+          signature: tx,
+          blockhash: transaction.recentBlockhash,
+          lastValidBlockHeight: (
+            await connection.getLatestBlockhash()
+          ).lastValidBlockHeight,
+        },
+        "confirmed"
+      );
       showSuccessToast("Treasury updated successfully");
     } catch (error) {
       console.error("Error updating treasury:", error);
@@ -101,13 +104,16 @@ export const Admin: FC = () => {
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           showSuccessToast("Redemption rate updated successfully");
         });
@@ -146,13 +152,16 @@ export const Admin: FC = () => {
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           showSuccessToast(
             `Redeemer ${
@@ -197,13 +206,16 @@ export const Admin: FC = () => {
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           showSuccessToast("Blacklist entry added successfully");
         });
@@ -245,13 +257,16 @@ export const Admin: FC = () => {
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           showSuccessToast("Blacklist entry removed successfully");
         });
@@ -294,13 +309,16 @@ export const Admin: FC = () => {
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           showSuccessToast("Redeemer admin updated successfully");
         });
@@ -338,13 +356,16 @@ export const Admin: FC = () => {
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           showSuccessToast("Redeemer admin accepted successfully");
         });
@@ -412,13 +433,16 @@ export const Admin: FC = () => {
 
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           showSuccessToast("Funds added successfully");
           // update the funds amount in the store

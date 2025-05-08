@@ -72,10 +72,10 @@ export const Dashboard: FC = () => {
           lockedTokens.amount !== 0 && (
             <div className="mt-8 flex justify-center">
               <Link
-                to="/unlock"
+                to="/redeem"
                 className="px-8 py-4 bg-[#007AFF] hover:bg-[#0066CC] text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02]"
               >
-                Unlock Tokens
+                Redeem veSBR
               </Link>
             </div>
           )}

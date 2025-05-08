@@ -197,13 +197,16 @@ export const Lock: FC = () => {
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
 
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           // reduce sbr balance
           setSbrBalance(sbrBalance - amountToLock);

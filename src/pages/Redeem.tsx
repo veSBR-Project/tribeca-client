@@ -160,13 +160,16 @@ export const Redeem: FC = () => {
       // Sign and send the transaction
       const tx = await wallet.adapter.sendTransaction(transaction, connection);
       await connection
-        .confirmTransaction({
-          signature: tx,
-          blockhash: transaction.recentBlockhash,
-          lastValidBlockHeight: (
-            await connection.getLatestBlockhash()
-          ).lastValidBlockHeight,
-        })
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
         .then(() => {
           if (lockedTokens?.escrow) {
             setLockedTokens(
@@ -176,11 +179,13 @@ export const Redeem: FC = () => {
             );
             setVotingPower(0);
           }
+
+          toast.success("Tokens redeemed successfully");
         })
         .catch((err) => {
-          console.error("Error unlocking tokens:", err);
+          console.error("Error redeeming tokens:", err);
           toast.error(
-            err instanceof Error ? err.message : "Failed to unlock tokens"
+            err instanceof Error ? err.message : "Failed to redeem tokens"
           );
         });
     } catch (err) {

@@ -151,6 +151,8 @@ export const WalletConnectButton = () => {
             amount: BN;
           };
 
+        console.log("redeemerData", redeemerData.amount.toNumber());
+
         setRedeemerStats({
           admin: redeemerData.admin.toBase58(),
           pendingAdmin: redeemerData.pendingAdmin.toBase58(),
