@@ -1014,6 +1014,42 @@
       ]
     },
     {
+      "name": "removeAllFunds",
+      "accounts": [
+        {
+          "name": "locker",
+          "isMut": false,
+          "isSigner": false
+        },
+        {
+          "name": "redeemer",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "redeemerReceiptAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "destinationTokenAccount",
+          "isMut": true,
+          "isSigner": false
+        },
+        {
+          "name": "payer",
+          "isMut": true,
+          "isSigner": true
+        },
+        {
+          "name": "tokenProgram",
+          "isMut": false,
+          "isSigner": false
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "toggleRedeemer",
       "accounts": [
         {
@@ -1576,6 +1612,41 @@
         {
           "name": "amount",
           "type": "u64",
+          "index": false
+        },
+        {
+          "name": "timestamp",
+          "type": "i64",
+          "index": false
+        }
+      ]
+    },
+    {
+      "name": "RemoveAllFundsEvent",
+      "fields": [
+        {
+          "name": "locker",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "redeemer",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "receiptMint",
+          "type": "publicKey",
+          "index": false
+        },
+        {
+          "name": "amount",
+          "type": "u64",
+          "index": false
+        },
+        {
+          "name": "admin",
+          "type": "publicKey",
           "index": false
         },
         {

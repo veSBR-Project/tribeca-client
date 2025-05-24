@@ -25,7 +25,7 @@ export const Admin: FC = () => {
   const [newTreasuryAddress, setNewTreasuryAddress] = useState("");
   const [newAdminAddress, setNewAdminAddress] = useState("");
   const [redemptionRate, setRedemptionRate] = useState("");
-  const [escrowAddress, setEscrowAddress] = useState("");
+  const [blacklistAddress, setBlacklistAddress] = useState("");
   const [toggleStatus, setToggleStatus] = useState<0 | 1>(1);
   const [fundAmount, setFundAmount] = useState("");
 
@@ -183,17 +183,26 @@ export const Admin: FC = () => {
   const handleAddBlacklistEntry = async () => {
     try {
       if (!wallet?.adapter.publicKey || !sdk) return;
-      if (!escrowAddress) {
+      if (!blacklistAddress) {
         showErrorToast("Please fill in all fields");
         return;
       }
+
+      const [escrowPDA] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("Escrow"),
+          new PublicKey(LOCKER_PDA).toBuffer(),
+          new PublicKey(blacklistAddress).toBuffer(),
+        ],
+        sdk.tribecaProgram.programId
+      );
 
       setLoading(true);
       const connection = new Connection(import.meta.env.VITE_SOLANA_RPC_URL);
       const { addBlacklistEntryInstruction } = await sdk.addBlacklistEntry(
         wallet.adapter.publicKey,
         new PublicKey(LOCKER_PDA),
-        new PublicKey(escrowAddress),
+        new PublicKey(escrowPDA),
         new PublicKey(REDEEMER_PDA)
       );
 
@@ -226,6 +235,7 @@ export const Admin: FC = () => {
       );
     } finally {
       setLoading(false);
+      setBlacklistAddress("");
     }
   };
 
@@ -233,10 +243,19 @@ export const Admin: FC = () => {
   const handleRemoveBlacklistEntry = async () => {
     try {
       if (!wallet?.adapter.publicKey || !sdk) return;
-      if (!escrowAddress) {
+      if (!blacklistAddress) {
         showErrorToast("Please fill in all fields");
         return;
       }
+
+      const [escrowPDA] = PublicKey.findProgramAddressSync(
+        [
+          Buffer.from("Escrow"),
+          new PublicKey(LOCKER_PDA).toBuffer(),
+          new PublicKey(blacklistAddress).toBuffer(),
+        ],
+        sdk.tribecaProgram.programId
+      );
 
       setLoading(true);
       const connection = new Connection(import.meta.env.VITE_SOLANA_RPC_URL);
@@ -244,7 +263,7 @@ export const Admin: FC = () => {
         await sdk.removeBlacklistEntry(
           wallet.adapter.publicKey,
           new PublicKey(LOCKER_PDA),
-          new PublicKey(escrowAddress),
+          new PublicKey(escrowPDA),
           new PublicKey(REDEEMER_PDA)
         );
 
@@ -279,6 +298,7 @@ export const Admin: FC = () => {
       );
     } finally {
       setLoading(false);
+      setBlacklistAddress("");
     }
   };
 
@@ -467,6 +487,91 @@ export const Admin: FC = () => {
     }
   };
 
+  // Remove all funds from the redeemer
+  const handleRemoveAllFunds = async () => {
+    try {
+      if (!wallet?.adapter.publicKey || !sdk) return;
+
+      const connection = new Connection(import.meta.env.VITE_SOLANA_RPC_URL);
+      const transaction = new Transaction();
+
+      const {
+        address: redeemerReceiptAccount,
+        instruction: redeemerReceiptInstruction,
+      } = await getOrCreateATA(
+        connection,
+        new PublicKey(USDC_MINT),
+        new PublicKey(REDEEMER_PDA),
+        wallet.adapter.publicKey,
+        true
+      );
+
+      const {
+        address: destinationTokenAccount,
+        instruction: destinationTokenInstruction,
+      } = await getOrCreateATA(
+        connection,
+        new PublicKey(USDC_MINT),
+        wallet.adapter.publicKey,
+        wallet.adapter.publicKey
+      );
+
+      if (destinationTokenInstruction) {
+        transaction.add(destinationTokenInstruction);
+      }
+
+      if (redeemerReceiptInstruction) {
+        transaction.add(redeemerReceiptInstruction);
+      }
+
+      setLoading(true);
+      const { removeAllFundsInstruction } = await sdk.removeAllFunds(
+        wallet.adapter.publicKey,
+        new PublicKey(LOCKER_PDA),
+        new PublicKey(REDEEMER_PDA),
+        new PublicKey(redeemerReceiptAccount),
+        new PublicKey(destinationTokenAccount)
+      );
+
+      transaction.add(removeAllFundsInstruction);
+      transaction.feePayer = wallet.adapter.publicKey;
+      transaction.recentBlockhash = (
+        await connection.getLatestBlockhash()
+      ).blockhash;
+
+      const tx = await wallet.adapter.sendTransaction(transaction, connection);
+      await connection
+        .confirmTransaction(
+          {
+            signature: tx,
+            blockhash: transaction.recentBlockhash,
+            lastValidBlockHeight: (
+              await connection.getLatestBlockhash()
+            ).lastValidBlockHeight,
+          },
+          "confirmed"
+        )
+        .then(() => {
+          showSuccessToast("All funds removed successfully");
+        });
+
+      // update the funds amount in the store
+      if (redeemerStats) {
+        setRedeemerStats({
+          ...redeemerStats,
+          amount: 0,
+        });
+      }
+    } catch (error) {
+      console.error("Error removing all funds:", error);
+      showErrorToast(
+        error instanceof Error ? error.message : "Failed to remove all funds"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   if (!wallet?.adapter.publicKey) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-[#000000] to-[#1C1C1E] pt-24 px-8">
@@ -630,10 +735,10 @@ export const Admin: FC = () => {
             <div className="space-y-4">
               <input
                 type="text"
-                value={escrowAddress}
-                onChange={(e) => setEscrowAddress(e.target.value)}
+                value={blacklistAddress}
+                onChange={(e) => setBlacklistAddress(e.target.value)}
                 className="w-full px-4 py-3 bg-[#1C1C1E] border border-[#38383A] rounded-xl text-white focus:outline-none focus:border-[#007AFF] focus:ring-2 focus:ring-[#007AFF]/20 transition-all duration-300"
-                placeholder="Escrow Address"
+                placeholder="Wallet Address"
               />
               <div className="flex space-x-4">
                 <button
@@ -705,6 +810,22 @@ export const Admin: FC = () => {
                 className="w-full py-4 bg-[#007AFF] hover:bg-[#0066CC] text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isLoading ? "Adding Funds..." : "Add Funds"}
+              </button>
+            </div>
+          </div>
+
+          {/* Remove All Funds */}
+          <div className="card">
+            <h2 className="text-2xl font-semold text-white mb-4">
+              Remove All Funds
+            </h2>
+            <div className="space-y-4">
+              <button
+                onClick={handleRemoveAllFunds}
+                disabled={isLoading}
+                className="w-full py-4 bg-[#FF3B30] hover:bg-[#FF2D55] text-white font-medium rounded-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isLoading ? "Removing Funds..." : "Remove All Funds"}
               </button>
             </div>
           </div>
