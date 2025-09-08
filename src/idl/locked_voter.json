@@ -683,11 +683,6 @@
           "isSigner": false
         },
         {
-          "name": "clock",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
           "name": "systemProgram",
           "isMut": false,
           "isSigner": false
@@ -863,7 +858,7 @@
         },
         {
           "name": "escrow",
-          "isMut": false,
+          "isMut": true,
           "isSigner": false
         },
         {
@@ -899,11 +894,6 @@
         },
         {
           "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
           "isMut": false,
           "isSigner": false
         }
@@ -961,11 +951,6 @@
         },
         {
           "name": "systemProgram",
-          "isMut": false,
-          "isSigner": false
-        },
-        {
-          "name": "clock",
           "isMut": false,
           "isSigner": false
         }
@@ -1299,6 +1284,55 @@
           {
             "name": "proposalActivationMinVotes",
             "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorCode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "InvalidRedemptionRate"
+          },
+          {
+            "name": "InvalidCutoffDate"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ErrorCode",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ProgramNotWhitelisted"
+          },
+          {
+            "name": "LockupDurationTooShort"
+          },
+          {
+            "name": "LockupDurationTooLong"
+          },
+          {
+            "name": "RefreshCannotShorten"
+          },
+          {
+            "name": "EscrowNotEnded"
+          },
+          {
+            "name": "MustProvideWhitelist"
+          },
+          {
+            "name": "EscrowOwnerNotWhitelisted"
+          },
+          {
+            "name": "MustCallLockWithWhitelistEntry"
+          },
+          {
+            "name": "MustCallLockPermissionless"
           }
         ]
       }
@@ -1790,11 +1824,53 @@
   "errors": [
     {
       "code": 6000,
+      "name": "InvalidTokenAccount",
+      "msg": "Invalid token account."
+    },
+    {
+      "code": 6001,
+      "name": "InsufficientFunds",
+      "msg": "Insufficient funds."
+    },
+    {
+      "code": 6002,
+      "name": "Unauthorized",
+      "msg": "Unauthorized action."
+    },
+    {
+      "code": 6003,
+      "name": "OperationFailed",
+      "msg": "Operation failed."
+    },
+    {
+      "code": 6004,
       "name": "RedeemerNotActive",
-      "msg": "Redeemer is currently paused"
+      "msg": "Redeemer is not active."
+    },
+    {
+      "code": 6005,
+      "name": "EscrowEmpty",
+      "msg": "Escrow is empty."
+    },
+    {
+      "code": 6006,
+      "name": "EscrowBlacklisted",
+      "msg": "Escrow account blacklisted."
+    },
+    {
+      "code": 6007,
+      "name": "EscrowTooRecent",
+      "msg": "This escrow is too recent to be redeemed."
+    },
+    {
+      "code": 6008,
+      "name": "InvalidRedemptionRate",
+      "msg": "Redemption rate must be greater than 0."
+    },
+    {
+      "code": 6009,
+      "name": "RedemptionRateSameAsPrevious",
+      "msg": "Redemption rate must be different from the previous rate."
     }
-  ],
-  "metadata": {
-    "address": "8tAhS8CX7if6tQWAqUSK1kebGbU1WCH3jBwafq2bifMw"
-  }
+  ]
 }
