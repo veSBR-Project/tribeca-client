@@ -146,7 +146,9 @@ export const Redeem: FC = () => {
         new PublicKey(USDC_MINT),
         redeemerReceiptAccount,
         lockedTokens.escrow,
+        wallet.adapter.publicKey, // escrowOwner
         escrowTokenAccount,
+
         new PublicKey(redeemerStats?.treasury),
         userReceipt
       );
