@@ -467,6 +467,7 @@ export class TribecaSDK {
    * @param receiptMint - The mint of the receipt token
    * @param redeemerReceiptAccount - The redeemer receipt token account
    * @param escrow - The escrow account
+   * @param escrowOwner - The owner of the escrow
    * @param escrowTokens - The escrow token account
    * @param treasuryTokenAccount - The treasury token account
    * @param userReceipt - The user receipt token account
@@ -479,6 +480,7 @@ export class TribecaSDK {
     receiptMint: PublicKey,
     redeemerReceiptAccount: PublicKey,
     escrow: PublicKey,
+    escrowOwner: PublicKey,
     escrowTokens: PublicKey,
     treasuryTokenAccount: PublicKey,
     userReceipt: PublicKey
@@ -496,6 +498,7 @@ export class TribecaSDK {
           locker: locker,
           redeemer: redeemer,
           escrow: escrow,
+          escrowOwner: escrowOwner,
           blacklist: blacklistPDA,
           receiptMint: receiptMint,
           redeemerReceiptAccount: redeemerReceiptAccount,
